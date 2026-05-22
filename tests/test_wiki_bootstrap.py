@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import path_setup  # noqa: F401
 from domain_researcher.wiki.bootstrap import bootstrap_wiki
 
 
