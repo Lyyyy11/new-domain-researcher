@@ -4,6 +4,8 @@
 
 - `src/domain_researcher/research/source_candidate.py`：定义 Deep Research 找到的候选资料。
 - `src/domain_researcher/research/deep_research_adapter.py`：把 Deep Research 的 todo item 结果转换为候选资料。
+- `src/domain_researcher/research/helloagents_runner.py`：调用真实 `helloagents-deepresearch` 的运行入口。
+- `src/domain_researcher/cli.py`：提供命令行入口，用于运行研究和确认摄入。
 - `src/domain_researcher/wiki/paths.py`：统一管理 memory 目录下的文件路径。
 - `src/domain_researcher/wiki/bootstrap.py`：初始化 raw、wiki、schema、purpose 和 log。
 - `src/domain_researcher/wiki/raw_store.py`：把候选资料保存为 raw source Markdown。
@@ -27,6 +29,16 @@ todo items
   -> data/memory/raw/sources/*.md
 ```
 
+真实 Deep Research 到 raw sources：
+
+```text
+用户输入研究主题
+  -> cli research
+  -> helloagents_runner.run_helloagents_deep_research()
+  -> workflows.research_to_raw.run_deep_research_as_raw_sources()
+  -> data/memory/raw/sources/*.md
+```
+
 raw sources 到 Wiki：
 
 ```text
@@ -34,6 +46,15 @@ confirmed raw source paths
   -> workflows.ingest_raw_to_wiki.ingest_confirmed_raw_sources()
   -> wiki.ingest.ingest_raw_source()
   -> wiki.writer 写来源页、主题页、index、overview、log
+```
+
+命令行确认摄入：
+
+```text
+cli confirm
+  -> 列出 pending raw sources
+  -> 用户选择编号或 all
+  -> workflows.ingest_raw_to_wiki.ingest_confirmed_raw_sources()
 ```
 
 Query：

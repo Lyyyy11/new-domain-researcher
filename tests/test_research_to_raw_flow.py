@@ -2,6 +2,7 @@
 
 import unittest
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 try:
@@ -9,7 +10,17 @@ try:
 except ModuleNotFoundError:
     from tests import path_setup  # noqa: F401
 from domain_researcher.research.deep_research_adapter import candidates_from_todo_items
-from domain_researcher.workflows.research_to_raw import save_research_results_as_raw_sources
+from domain_researcher.workflows.research_to_raw import (
+    run_deep_research_as_raw_sources,
+    save_research_results_as_raw_sources,
+)
+
+
+@dataclass
+class FakeResearchOutput:
+    """模拟 helloagents-deepresearch 的 SummaryStateOutput。"""
+
+    todo_items: list[dict[str, str]]
 
 
 class ResearchToRawFlowTest(unittest.TestCase):
@@ -53,3 +64,27 @@ class ResearchToRawFlowTest(unittest.TestCase):
             self.assertTrue(paths[0].is_file())
             self.assertFalse((root / "wiki" / "topics").exists())
             self.assertFalse((root / "wiki" / "sources").exists())
+
+    def test_run_deep_research_as_raw_sources_uses_real_api_shape(self):
+        """真实 Deep Research 形状的输出应能直接保存为 raw sources。"""
+        def fake_runner(topic: str) -> FakeResearchOutput:
+            return FakeResearchOutput(
+                todo_items=[
+                    {
+                        "title": "真实检索",
+                        "query": f"{topic} research",
+                        "summary": "真实任务总结",
+                        "sources_summary": "- 标题: 真实资料\n  URL: https://example.com/real\n  摘要: 真实摘要",
+                    }
+                ]
+            )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "memory"
+
+            saved_paths = run_deep_research_as_raw_sources(root, "真实主题", fake_runner)
+
+            self.assertEqual(len(saved_paths), 1)
+            text = saved_paths[0].read_text(encoding="utf-8")
+            self.assertIn("真实资料", text)
+            self.assertIn("https://example.com/real", text)

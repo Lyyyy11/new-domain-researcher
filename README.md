@@ -44,6 +44,20 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m unittest discover -s tests
 ```
 
+运行真实 Deep Research 并保存 raw sources：
+
+```powershell
+$env:PYTHONPATH='src'
+.\.venv\Scripts\python.exe -m domain_researcher.cli research "研究主题" --backend-src-path ".\external_references\hello-agents-chapter14\helloagents-deepresearch\backend\src"
+```
+
+确认待摄入资料并写入 Wiki：
+
+```powershell
+$env:PYTHONPATH='src'
+.\.venv\Scripts\python.exe -m domain_researcher.cli confirm
+```
+
 ## 部署方法
 
 第一版是本地文件原型，不需要部署服务。
@@ -67,6 +81,8 @@ git push
 - Wiki 初始化。
 - raw source 保存。
 - Deep Research 结果适配。
+- 真实 Deep Research 输出到 raw sources 的工作流。
+- raw sources 人工确认入口。
 - Ingest。
 - Query。
 - Lint。
@@ -96,6 +112,8 @@ git push
 - 初始化 llm-wiki 风格目录。
 - 保存 Deep Research raw sources。
 - 从 Deep Research todo items 提取候选资料。
+- 接入真实 `helloagents-deepresearch` 输出形状，可运行后保存 raw sources。
+- 增加命令行确认入口，选择 raw sources 后再摄入 Wiki。
 - 把已确认 raw source 摄入 Wiki。
 - 读取 Wiki 上下文用于 Query。
 - 检查 Wiki 基础健康状态。
@@ -103,6 +121,5 @@ git push
 
 ## 待办事项
 
-- 接入真实 `helloagents-deepresearch` API。
-- 增加用户确认 raw sources 的界面或命令。
 - 后续把确定性 Ingest 替换为 LLM 生成。
+- 把命令行确认入口升级为更友好的界面。
