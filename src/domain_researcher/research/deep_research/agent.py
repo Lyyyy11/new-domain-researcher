@@ -133,7 +133,8 @@ class DeepResearchAgent:
             state.todo_items = [self.planner.create_fallback_task(state)]
 
         for task in state.todo_items:
-            self._execute_task(state, task, emit_stream=False)
+            for _event in self._execute_task(state, task, emit_stream=False):
+                pass
 
         report = self.reporting.generate_report(state)
         self._drain_tool_events(state)
