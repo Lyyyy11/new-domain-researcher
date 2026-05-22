@@ -62,3 +62,31 @@ class RawSourceConfirmationTest(unittest.TestCase):
             self.assertIn("资料一", index_text)
             self.assertNotIn("资料二", index_text)
             self.assertTrue(any("资料一" in message for message in messages))
+
+    def test_confirm_pending_sources_bootstraps_wiki_when_missing(self):
+        """未初始化 Wiki 时，确认入口应先创建 Wiki 目录。"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "memory"
+            save_raw_source(
+                root,
+                SourceCandidate(
+                    title="资料一",
+                    url="https://example.com/one",
+                    source_type="web",
+                    research_topic="测试主题",
+                    search_query="查询",
+                    task_title="任务",
+                    summary="摘要一",
+                    raw_excerpt="片段一",
+                ),
+            )
+
+            result = confirm_pending_sources_and_ingest(
+                root,
+                input_func=lambda _prompt: "all",
+                output_func=lambda _message: None,
+            )
+
+            self.assertTrue(result.created_pages)
+            self.assertTrue((root / "wiki" / "sources").is_dir())
+            self.assertTrue((root / "wiki" / "index.md").is_file())

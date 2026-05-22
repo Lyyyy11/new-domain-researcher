@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Callable
 
+from domain_researcher.wiki.bootstrap import bootstrap_wiki
 from domain_researcher.wiki.models import IngestResult
 from domain_researcher.workflows.ingest_raw_to_wiki import ingest_confirmed_raw_sources
 from domain_researcher.workflows.research_to_raw import run_deep_research_as_raw_sources
@@ -30,6 +31,7 @@ def confirm_pending_sources_and_ingest(
         output_func("已取消摄入。")
         return IngestResult()
 
+    bootstrap_wiki(Path(root), purpose="Deep Research-assisted LLM Wiki")
     result = ingest_confirmed_raw_sources(Path(root), selected)
     output_func(f"已摄入 {len(selected)} 个 raw source。")
     return result
