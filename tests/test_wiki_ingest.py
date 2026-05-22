@@ -10,6 +10,7 @@ except ModuleNotFoundError:
     from tests import path_setup  # noqa: F401
 from domain_researcher.wiki.bootstrap import bootstrap_wiki
 from domain_researcher.wiki.ingest import ingest_raw_source
+from domain_researcher.workflows.ingest_raw_to_wiki import ingest_confirmed_raw_sources
 
 
 class WikiIngestTest(unittest.TestCase):
@@ -42,3 +43,40 @@ class WikiIngestTest(unittest.TestCase):
                 (root / "wiki" / "index.md").read_text(encoding="utf-8"),
             )
             self.assertIn("ingest", (root / "log.md").read_text(encoding="utf-8"))
+
+    def test_ingest_confirmed_raw_sources_only_uses_given_paths(self):
+        """工作流只摄入明确传入的 raw source，不自动扫描全部目录。"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "memory"
+            bootstrap_wiki(root, purpose="测试知识库")
+            included = root / "raw" / "sources" / "source-included.md"
+            excluded = root / "raw" / "sources" / "source-excluded.md"
+            included.write_text(
+                "---\n"
+                "title: \"已确认资料\"\n"
+                "url: \"https://example.com/included\"\n"
+                "research_topic: \"测试主题\"\n"
+                "---\n\n"
+                "# 已确认资料\n\n"
+                "## 摘要\n\n"
+                "这是已确认摘要。\n",
+                encoding="utf-8",
+            )
+            excluded.write_text(
+                "---\n"
+                "title: \"未确认资料\"\n"
+                "url: \"https://example.com/excluded\"\n"
+                "research_topic: \"测试主题\"\n"
+                "---\n\n"
+                "# 未确认资料\n\n"
+                "## 摘要\n\n"
+                "这是未确认摘要。\n",
+                encoding="utf-8",
+            )
+
+            result = ingest_confirmed_raw_sources(root, [included])
+
+            index_text = (root / "wiki" / "index.md").read_text(encoding="utf-8")
+            self.assertTrue(result.created_pages)
+            self.assertIn("已确认资料", index_text)
+            self.assertNotIn("未确认资料", index_text)
