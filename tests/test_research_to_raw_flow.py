@@ -2,7 +2,10 @@
 
 import unittest
 
-import path_setup  # noqa: F401
+try:
+    import path_setup  # noqa: F401
+except ModuleNotFoundError:
+    from tests import path_setup  # noqa: F401
 from domain_researcher.research.deep_research_adapter import candidates_from_todo_items
 
 
