@@ -22,3 +22,18 @@ class IngestResult:
     created_pages: list[Path] = field(default_factory=list)
     updated_pages: list[Path] = field(default_factory=list)
     skipped_sources: list[Path] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class LintIssue:
+    """表示一个 Wiki 健康检查问题。"""
+
+    message: str
+    path: Path | None = None
+
+
+@dataclass
+class LintReport:
+    """保存 Wiki 健康检查结果。"""
+
+    issues: list[LintIssue] = field(default_factory=list)
