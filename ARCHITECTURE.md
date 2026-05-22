@@ -4,7 +4,8 @@
 
 - `src/domain_researcher/research/source_candidate.py`：定义 Deep Research 找到的候选资料。
 - `src/domain_researcher/research/deep_research_adapter.py`：把 Deep Research 的 todo item 结果转换为候选资料。
-- `src/domain_researcher/research/helloagents_runner.py`：调用真实 `helloagents-deepresearch` 的运行入口。
+- `src/domain_researcher/research/deep_research/`：内置 Deep Research 后端核心代码，负责规划任务、搜索、总结和报告。
+- `src/domain_researcher/research/helloagents_runner.py`：调用内置 Deep Research 的运行入口。
 - `src/domain_researcher/cli.py`：提供命令行入口，用于运行研究和确认摄入。
 - `src/domain_researcher/wiki/paths.py`：统一管理 memory 目录下的文件路径。
 - `src/domain_researcher/wiki/bootstrap.py`：初始化 raw、wiki、schema、purpose 和 log。
@@ -35,6 +36,7 @@ todo items
 用户输入研究主题
   -> cli research
   -> helloagents_runner.run_helloagents_deep_research()
+  -> research.deep_research.agent.run_deep_research()
   -> workflows.research_to_raw.run_deep_research_as_raw_sources()
   -> data/memory/raw/sources/*.md
 ```
@@ -76,6 +78,7 @@ memory root
 ## 关键设计决定
 
 - Deep Research 不直接写 Wiki，只保存 raw sources，避免未经确认的资料进入长期知识库。
+- Deep Research 核心代码内置在主项目中，避免用户额外拉取 `external_references/`。
 - Ingest 只处理用户明确传入的 raw source 路径，不自动扫描全部目录。
 - 第一版使用确定性规则生成 Wiki 页面，先固化文件生命周期，后续再接 LLM。
 - 所有长期知识都用 Markdown 文件保存，便于人工查看和 Git 管理。

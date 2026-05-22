@@ -17,7 +17,7 @@
 
 主要部分：
 
-- `research`：把 Deep Research 的任务结果整理成候选资料。
+- `research`：内置 Deep Research 核心能力，并把任务结果整理成候选资料。
 - `wiki`：负责初始化 Wiki、保存 raw sources、Ingest、Query 和 Lint。
 - `workflows`：把单个能力串成完整流程。
 - `tests`：使用 `unittest` 做单元测试。
@@ -38,6 +38,12 @@
 python -m venv .venv
 ```
 
+安装项目依赖：
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e .
+```
+
 运行测试：
 
 ```powershell
@@ -48,7 +54,16 @@ python -m venv .venv
 
 ```powershell
 $env:PYTHONPATH='src'
-.\.venv\Scripts\python.exe -m domain_researcher.cli research "研究主题" --backend-src-path ".\external_references\hello-agents-chapter14\helloagents-deepresearch\backend\src"
+.\.venv\Scripts\python.exe -m domain_researcher.cli research "研究主题"
+```
+
+真实搜索需要在项目根目录 `.env` 中配置搜索和模型，例如：
+
+```env
+SEARCH_API=tavily
+TAVILY_API_KEY=你的_tavily_key
+LLM_PROVIDER=ollama
+LOCAL_LLM=llama3.2
 ```
 
 确认待摄入资料并写入 Wiki：
@@ -112,7 +127,7 @@ git push
 - 初始化 llm-wiki 风格目录。
 - 保存 Deep Research raw sources。
 - 从 Deep Research todo items 提取候选资料。
-- 接入真实 `helloagents-deepresearch` 输出形状，可运行后保存 raw sources。
+- 内置 Deep Research 后端核心代码，可直接通过主项目环境运行并保存 raw sources。
 - 增加命令行确认入口，选择 raw sources 后再摄入 Wiki。
 - 把已确认 raw source 摄入 Wiki。
 - 读取 Wiki 上下文用于 Query。

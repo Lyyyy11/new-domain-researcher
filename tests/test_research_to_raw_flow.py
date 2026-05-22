@@ -4,12 +4,14 @@ import unittest
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from unittest.mock import patch
 
 try:
     import path_setup  # noqa: F401
 except ModuleNotFoundError:
     from tests import path_setup  # noqa: F401
 from domain_researcher.research.deep_research_adapter import candidates_from_todo_items
+from domain_researcher.research.helloagents_runner import run_helloagents_deep_research
 from domain_researcher.workflows.research_to_raw import (
     run_deep_research_as_raw_sources,
     save_research_results_as_raw_sources,
@@ -107,3 +109,15 @@ class ResearchToRawFlowTest(unittest.TestCase):
             text = saved_paths[0].read_text(encoding="utf-8")
             self.assertIn("真实资料", text)
             self.assertIn("https://example.com/real", text)
+
+    def test_run_helloagents_deep_research_uses_bundled_module(self):
+        """runner 应优先调用主项目内置的 Deep Research 模块。"""
+        with patch("importlib.import_module") as import_module:
+            import_module.return_value.run_deep_research.return_value = "ok"
+
+            result = run_helloagents_deep_research("测试主题")
+
+            self.assertEqual(result, "ok")
+            import_module.assert_called_once_with(
+                "domain_researcher.research.deep_research.agent"
+            )

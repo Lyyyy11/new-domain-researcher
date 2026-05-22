@@ -2,21 +2,18 @@
 
 from pathlib import Path
 from typing import Any
-import sys
+import importlib
 
 
 def run_helloagents_deep_research(topic: str, backend_src_path: Path | None = None) -> Any:
-    """调用 helloagents-deepresearch 的 run_deep_research。"""
+    """调用主项目内置的 helloagents Deep Research。"""
     if backend_src_path is not None:
-        path_text = str(Path(backend_src_path))
-        if path_text not in sys.path:
-            sys.path.insert(0, path_text)
-
+        _ = backend_src_path
     try:
-        from agent import run_deep_research
+        module = importlib.import_module("domain_researcher.research.deep_research.agent")
     except ImportError as exc:
         raise RuntimeError(
-            "无法导入 helloagents-deepresearch，请传入 backend src 路径或先安装参考后端依赖。"
+            "无法导入内置 Deep Research，请先安装主项目依赖。"
         ) from exc
 
-    return run_deep_research(topic)
+    return module.run_deep_research(topic)
