@@ -45,12 +45,8 @@ def _parse_sources_summary(text: str) -> list[dict[str, str]]:
     if not text.strip():
         return []
 
-    matches = re.finditer(
-        r"标题:\s*(?P<title>.+?)\s*\n\s*URL:\s*(?P<url>\S+)(?:\s*\n\s*摘要:\s*(?P<summary>.+))?",
-        text,
-    )
     sources = []
-    for match in matches:
+    for match in _parse_labeled_sources(text):
         sources.append(
             {
                 "title": match.group("title").strip(),
@@ -58,4 +54,32 @@ def _parse_sources_summary(text: str) -> list[dict[str, str]]:
                 "summary": (match.group("summary") or "").strip(),
             }
         )
+    if sources:
+        return sources
+
+    for match in _parse_bullet_sources(text):
+        sources.append(
+            {
+                "title": match.group("title").strip(),
+                "url": match.group("url").strip(),
+                "summary": "",
+            }
+        )
     return sources
+
+
+def _parse_labeled_sources(text: str):
+    """解析“标题 / URL / 摘要”格式来源。"""
+    return re.finditer(
+        r"标题:\s*(?P<title>.+?)\s*\n\s*URL:\s*(?P<url>\S+)(?:\s*\n\s*摘要:\s*(?P<summary>.+))?",
+        text,
+    )
+
+
+def _parse_bullet_sources(text: str):
+    """解析 helloagents 实际输出的“* 标题 : URL”格式来源。"""
+    return re.finditer(
+        r"^\s*[*-]\s*(?P<title>.+?)\s*:\s*(?P<url>https?://\S+)\s*$",
+        text,
+        flags=re.MULTILINE,
+    )

@@ -44,6 +44,25 @@ class ResearchToRawFlowTest(unittest.TestCase):
         self.assertEqual(candidates[0].url, "https://example.com/a")
         self.assertEqual(candidates[0].research_topic, "测试主题")
 
+    def test_candidates_from_todo_items_extracts_helloagents_source_format(self):
+        """应兼容 helloagents 后端实际输出的来源列表格式。"""
+        todo_items = [
+            {
+                "title": "背景检索",
+                "query": "测试主题 background",
+                "summary": "任务总结",
+                "sources_summary": "* 资料A : https://example.com/a\n* 资料B : https://example.com/b",
+            }
+        ]
+
+        candidates = candidates_from_todo_items("测试主题", todo_items)
+
+        self.assertEqual(len(candidates), 2)
+        self.assertEqual(candidates[0].title, "资料A")
+        self.assertEqual(candidates[0].url, "https://example.com/a")
+        self.assertEqual(candidates[1].title, "资料B")
+        self.assertEqual(candidates[1].url, "https://example.com/b")
+
     def test_save_research_results_as_raw_sources_does_not_write_wiki(self):
         """研究工作流只保存 raw sources，不创建 Wiki 页面。"""
         todo_items = [
